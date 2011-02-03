@@ -211,6 +211,7 @@ module ActiveMerchant
           :authorization => parsed[:authcode],
           :cvv_result => parsed[:cvnresult],
           :body => response,
+          :request => request,
           :avs_result => { 
             :street_match => parsed[:avsaddressresponse],
             :postal_match => parsed[:avspostcoderesponse]
