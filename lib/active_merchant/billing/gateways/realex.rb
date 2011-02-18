@@ -59,9 +59,9 @@ module ActiveMerchant
       self.homepage_url = 'http://www.realexpayments.com/'
       self.display_name = 'Realex'
            
-      SUCCESS, DECLINED          = "Successful", "Declined"
-      BANK_ERROR = REALEX_ERROR  = "Gateway is in maintenance. Please try again later."
-      ERROR = CLIENT_DEACTIVATED = "Gateway Error"
+      SUCCESS, DECLINED          = "Successful", "Card Declined"
+      BANK_ERROR = REALEX_ERROR  = "Payment Provider is currently down for maintenance. Please try again later."
+      ERROR = CLIENT_DEACTIVATED = "Payment Provider Error. Please try again later."
       
       def initialize(options = {})
         requires!(options, :login, :password)
@@ -87,7 +87,7 @@ module ActiveMerchant
         requires!(options, :order_id)
 
         request = build_purchase_or_authorization_request(:authorization, money, creditcard, options) 
-        commit(request)
+        commit(request, :default, options)
       end
       
       # Perform a purchase, which is essentially an authorization and capture in a single operation.
@@ -106,7 +106,7 @@ module ActiveMerchant
         requires!(options, :order_id)
 
         request = build_purchase_or_authorization_request(:purchase, money, creditcard, options)
-        commit(request)
+        commit(request, :default, options)
       end
       
       # Captures the funds from an authorized transaction.
@@ -126,7 +126,7 @@ module ActiveMerchant
         requires!(options, :order_id)
         
         request = build_capture_request(authorization, options) 
-        commit(request)
+        commit(request, :default, options)
       end
       
       # Credit an account.
@@ -150,7 +150,7 @@ module ActiveMerchant
         requires!(options, :pasref)
         
         request = build_credit_request(money, authorization, options)
-        commit(request)
+        commit(request, :default, options)
       end
       
       # Void a previous transaction
@@ -169,7 +169,7 @@ module ActiveMerchant
         requires!(options, :pasref)
         
         request = build_void_request(authorization, options) 
-        commit(request)
+        commit(request, :default, options)
       end
 
       # Recurring Payments
@@ -200,9 +200,15 @@ module ActiveMerchant
  
       private
       
-      def commit(request, endpoint=:default)
-        url = URL
-        url = RECURRING_PAYMENTS_URL if endpoint == :recurring
+      def endpoint(endpoint=:default, options={})
+        return URL if :default
+        return RECURRING_PAYMENTS_URL if :recurring
+        return options[:endpoint]
+      end
+      
+      def commit(request, endpoint=:default, options={})
+        url = self.endpoint(endpoint, options)
+        
         response = ssl_post(url, request)
         parsed = parse(response)
 
