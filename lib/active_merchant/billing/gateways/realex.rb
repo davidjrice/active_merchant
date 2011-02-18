@@ -200,14 +200,14 @@ module ActiveMerchant
  
       private
       
-      def endpoint(endpoint=:default, options={})
+      def current_endpoint(endpoint=:default, options={})
         return options[:endpoint] if options[:endpoint]
         return RECURRING_PAYMENTS_URL if endpoint == :recurring
         return URL
       end
       
       def commit(request, endpoint=:default, options={})
-        url = self.endpoint(endpoint, options)
+        url = current_endpoint(endpoint, options)
         STDERR.puts "REALEXRL #{url}"
         response = ssl_post(url, request)
         parsed = parse(response)
