@@ -208,7 +208,7 @@ module ActiveMerchant
       
       def commit(request, endpoint=:default, options={})
         url = self.endpoint(endpoint, options)
-        
+        STDERR.puts "REALEXRL #{url}"
         response = ssl_post(url, request)
         parsed = parse(response)
 
