@@ -201,9 +201,9 @@ module ActiveMerchant
       private
       
       def endpoint(endpoint=:default, options={})
-        return URL if :default
-        return RECURRING_PAYMENTS_URL if :recurring
-        return options[:endpoint]
+        return options[:endpoint] if options[:endpoint]
+        return RECURRING_PAYMENTS_URL if endpoint == :recurring
+        return URL
       end
       
       def commit(request, endpoint=:default, options={})
